@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prank</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    .box {
+      max-width: 360px;
+      width: 100%;
+      margin: auto;
+    }
+
+    /* Audio ko hide rakha, sirf background music ke liye */
+    #bg-music {
+      position: absolute;
+      z-index: -1;
+      height: 0;
+      visibility: hidden;
+    }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="box" id="click-area">
+    
+    <p class="hint" id="status">Loading...</p>
+
+    <!-- Apni audio file yahan -->
+    <audio id="bg-music" src="1.mp3" autoplay loop></audio>
+  </div>
+
+  <script>
+    const audio = document.getElementById('bg-music');
+    const statusText = document.getElementById('status');
+    const clickArea = document.getElementById('click-area');
+
+    // 1) Page load par autoplay try karo
+    window.addEventListener('load', () => {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            statusText.textContent = 'Autoplay successful ✔';
+          })
+          .catch(err => {
+            console.log('Autoplay blocked:', err);
+            statusText.textContent = '';
+          });
+      } else {
+        // Very old browsers: koi promise nahi
+        statusText.textContent = 'Autoplay behavior unknown.';
+      }
+    });
+
+    // 2) Agar autoplay block ho gaya ho to user click/tap par play karo
+    function handleUserPlay() {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            statusText.textContent = '';
+            // Ek baar play ho jaye to listener hata do
+            document.removeEventListener('click', handleUserPlay);
+            document.removeEventListener('touchend', handleUserPlay);
+          })
+          .catch(err => {
+            console.log('Play failed:', err);
+          });
+      }
+    }
+
+    // Pura page (ya sirf click-area) par listener laga sakte ho
+    document.addEventListener('click', handleUserPlay);
+    document.addEventListener('touchend', handleUserPlay);
+  </script>
+</body>
+</html>
